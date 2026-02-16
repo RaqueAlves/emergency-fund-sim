@@ -1,0 +1,30 @@
+# --- Bytecode do Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Testes e Qualidade de Código (Pytest / Coverage) ---
+.pytest_cache/
+.coverage
+htmlcov/
+test-results/
+
+# --- Ambientes Virtuais (Venv) ---
+venv/
+env/
+.venv/
+.env
+
+# --- Distribuição e Builds ---
+build/
+dist/
+*.egg-info/
+
+# --- IDEs e Editores ---
+.vscode/
+.idea/
+*.swp
+
+# --- Logs e Arquivos Temporários ---
+*.log
+*.sqlite3
