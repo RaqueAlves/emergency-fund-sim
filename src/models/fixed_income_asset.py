@@ -19,17 +19,24 @@ class FixedIncomeAsset:
         name:'CDB' | 'LCI' | 'LCA' | 'CRI' | 'CRA' | 'Debênture' | 'Tesouro Selic' | 'Poupança', 
         iyield_strategy:IYieldStrategy, 
         institute:str, 
-        min_contribution:float, 
+        min_contribution:float,
+        invested_amount:float,
         insurance_company: str,
         aplication_date: Date,
         due_date: Date,
-        liquidity: LiquidityType,
+        liquidity: str,
         venture: 'alto' | 'médio' | 'baixo' | 'baxissimo',
     ):
-        self.__name = name
+        if invested_amount < min_contribution:
+            raise ValueError(
+                f"Erro: O valor investido (R$ {invested_amount}) é menor que o mínimo permitido (R$ {min_contribution}) para este ativo."
+            )
+
+        self.__name = name 
         self.__iyield_strategy = iyield_strategy
         self.__institute = institute
         self.__min_contribution = min_contribution
+        self.__invested_amount = invested_amount
         self.__aplication_date = aplication_date
         self.__due_date = due_date 
         self.__liquidity = liquidity
@@ -63,19 +70,29 @@ class FixedIncomeAsset:
     def get_venture(self):
         return self.__venture
 
-    def simulate_current_value(self) -> dict:
-        # Calcula dias passados (exemplo simples)
-        days_passed = (date.today() - self.__aplication_date).days
+    def calculate_income(self, principal: float, days: int) -> float:
+        gross_amount = self.__iyield_strategy.calculate_gross_amount(principal, days)
+        taxes = self.__iyield_strategy.calculate_taxes(principal, gross_amount, days)
+        final_amount = gross_amount - taxes
+        return final_amount
+        
+    def simulate_current_status(self):
+        today = date.today()
+        days_passed = (today - self.__aplication_date).days
         if days_passed < 0: days_passed = 0
-
-        # Chama a estratégia para fazer a conta difícil
-        gross = self.__iyield_strategy.calculate_final_amount(self.__min_contribution, days_passed)
-        tax = self.__iyield_strategy.calculate_taxes(self.__min_contribution, gross, days_passed)
-        net = gross - tax
-
+        
+        # CORREÇÃO AQUI: Usamos o invested_amount, não o min_contribution
+        gross = self.__iyield_strategy.calculate_gross_amount(self.__invested_amount, days_passed)
+        taxes = self.__iyield_strategy.calculate_taxes(self.__invested_amount, gross, days_passed)
+        net = gross - taxes
+        
         return {
-            "valor_bruto": gross,
-            "imposto_devido": tax,
-            "valor_liquido": net,
+            "nome": self.__name,
+            "dias_corridos": days_passed,
+            "valor_investido": self.__invested_amount, # Útil mostrar isso no retorno
+            "valor_bruto": round(gross, 2),
+            "impostos": round(taxes, 2),
+            "valor_liquido": round(net, 2),
+            "lucro_liquido": round(net - self.__invested_amount, 2),
             "rentabilidade": self.__iyield_strategy.get_profitability_description()
-        }
+        }       

@@ -13,7 +13,7 @@ O objetivo deste projeto é projetar o crescimento de uma reserva financeira, ca
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Linguagem:** Python 3.x
+- **Linguagem:** Python 3.14.3
 - **Testes:** Pytest
 - **Conceitos:** POO, Design Patterns (Strategy), Clean Architecture.
 
